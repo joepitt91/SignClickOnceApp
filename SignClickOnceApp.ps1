@@ -5,6 +5,7 @@
     [string]$SHA1CertThumbprint, 
     [string]$SHA256CertThumbprint, 
     [string]$TimeStampingServer,
+    [string]$PublisherName,
     [switch]$Verbose
 )
 
@@ -164,6 +165,13 @@ if ("$TimeStampingServer" -notmatch "^http(s)?:\/\/[A-Za-z0-9-._~:/?#[\]@!$&'()*
     exit 11
 }
 
+# Publisher Name
+# Project Path
+if(!$PSBoundParameters.ContainsKey('PublisherName'))
+{
+    $PublisherName = Read-Host "Publisher Name"
+}
+
 # Sign setup.exe and application.exe with SHA256 Cert
 Write-Verbose "Signing '$PublishPath\Setup.exe' (SHA256)"
 Start-Process "$PSScriptRoot\signtool.exe" -ArgumentList "sign /fd SHA256 /td SHA256 /tr $TimeStampingServer /sha1 $SHA256CertThumbprint `"$PublishPath\Setup.exe`"" -Wait -NoNewWindow
@@ -180,9 +188,9 @@ Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$Pro
 
 # Sign ClickOnces with SHA1 Cert
 Write-Verbose "Signing '$TargetPath\$ProjectName.application' (SHA1)"
-Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$ProjectName.application`"  -ch $SHA1CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"Joe Pitt`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
+Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$ProjectName.application`"  -ch $SHA1CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"$PublisherName`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
 Write-Verbose "Signing '$PublishPath\$ProjectName.application' (SHA1)"
-Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$PublishPath\$ProjectName.application`" -ch $SHA1CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"Joe Pitt`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
+Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$PublishPath\$ProjectName.application`" -ch $SHA1CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"$PublisherName`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
 
 # Readd .deply extensions
 Write-Verbose "Re-adding .deploy extensions"
