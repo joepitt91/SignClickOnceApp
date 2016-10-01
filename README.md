@@ -22,4 +22,5 @@ Extract the ZIP archive and open PowerShell, type C:\Path\to\\SignClickOnceApp.p
 * **-SHA1CertThumbprint** The Thumbprint of the SHA1 Code Signing Certificate, if not provided the user is prompted.
 * **-SHA256CertThumbprint** The Thumbprint of the SHA256 Code Signing Certificate, if not provided the user is prompted.
 * **-TimeStampingServer** The Time Stamping Server to be used while signing, if not provided the user is prompted.
+* **-PublisherName** The Publisher to be set on the ClickOnce files, if not provided the user is prompted.
 * **-Verbose** Writes verbose output.
