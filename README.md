@@ -8,6 +8,10 @@ Microsoft ClickOnce Applications Signed with a SHA256 Certificate show as Unknow
 
 This script uses two code signing certificates (one SHA1 and one SHA256) to sign the various parts of the ClickOnce Application so that both the ClickOnce Installer and SmartScreen are happy. 
 
+## Links
+* [Project Page](https://www.joepitt.co.uk/Project/SignClickOnceApp/)
+* **BugTrac** (Coming Soon...)
+
 ## Usage
 Extract the ZIP archive and open PowerShell, type C:\Path\to\\SignClickOnceApp.ps1, plus any of the options below.
 
