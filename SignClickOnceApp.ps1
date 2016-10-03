@@ -1,4 +1,38 @@
-﻿param (
+﻿<#
+.SYNOPSIS 
+    A PowerShell Script to correctly sign a ClickOnce Application.
+.DESCRIPTION 
+    Microsoft ClickOnce Applications Signed with a SHA256 Certificate show as Unknown Publisher during installation, ClickOnce Applications signed with a SHA1 Certificate show an Unknown Publisher SmartScreen Warning once installed, this happens because:
+    1) The ClickOnce installer only supports SHA1 certificates (not SHA256), but,
+    2) Microsoft has depreciated SHA1 for Authenticode Signing.
+    
+    This script uses two code signing certificates (one SHA1 and one SHA256) to sign the various parts of the ClickOnce Application so that both the ClickOnce Installer and SmartScreen are happy.
+.PARAMETER VSRoot
+    The Visual Studio Projects folder, if not provided .\Documents\Visual Studio 2015\Projects will be assumed
+.PARAMETER SolutionName
+    The Name of the Visual Studio Solution (Folder), if not provided the user is prompted.
+.PARAMETER ProjectName
+    The Name of the Visual Studio Project (Folder), if not provided the user is prompted.
+.PARAMETER SHA1CertThumbprint
+    The Thumbprint of the SHA1 Code Signing Certificate, if not provided the user is prompted.
+.PARAMETER SHA256CertThumbprint
+    The Thumbprint of the SHA256 Code Signing Certificate, if not provided the user is prompted.
+.PARAMETER TimeStampingServer
+    The Time Stamping Server to be used while signing, if not provided the user is prompted.
+.PARAMETER PublisherName
+    The Publisher to be set on the ClickOnce files, if not provided the user is prompted.
+.PARAMETER Verbose
+    Writes verbose output.
+.EXAMPLE
+    SignClickOnceApp.ps1 -VSRoot "C:\Users\Username\Documents\Visual Studio 2015\Projects" -SolutionName "MySolution" -ProjectName "MyProject" -SHA1CertThumbprint "f3f33ccc36ffffe5baba632d76e73177206143eb" -SHA256CertThumbprint "5d81f6a4e1fb468a3b97aeb3601a467cdd5e3266" -TimeStampingServer "http://time.certum.pl/" -PublisherName "Awesome Software Inc."
+    Signs MyProject in MySolution which is in C:\Users\Username\Documents\Visual Studio 2015\Projects using the specified certificates, with a publisher of "Awesome Software Inc." and the Certum Timestamping Server.
+.NOTES 
+    Author  : Joe Pitt
+    License : SignClickOnceApp by Joe Pitt is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.
+.LINK 
+    https://www.joepitt.co.uk/Project/SignClickOnceApp/
+#>
+param (
     [string]$VSRoot, 
     [string]$SolutionName, 
     [string]$ProjectName, 
