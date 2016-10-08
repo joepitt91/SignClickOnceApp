@@ -139,7 +139,7 @@ if ($($TargetPath.Length) -ne 0)
 else
 {
     Write-Error -Message "No versions." -RecommendedAction "Check Project has been published to \publish and try again" -ErrorId "6" `
-        -Category ObjectNotFound -CategoryActivity "Searching for published version path" -CategoryReason "No Application has been published using ClickOnce" `
+        -Category ObjectNotFound -CategoryActivity "Searching for published version path" -CategoryReason "Application has not been published yet" `
         -CategoryTargetName "$AppFilesPath\${ProjectName}_*" -CategoryTargetType "Directory"
     exit 6
 }
@@ -152,7 +152,7 @@ if(!$PSBoundParameters.ContainsKey('SHA1CertThumbprint'))
 if ("$SHA1CertThumbprint" -notmatch "^[0-9A-Fa-f]{40}$")
 {
     Write-Error -Message "SHA1 Thumbprint Malformed" -RecommendedAction "Check the thumbprint and try again" -ErrorId "7" `
-        -Category InvalidArgument -CategoryActivity "Verifying Thumbprint Format" -CategoryReason "Thumbprint is not a 40 character Base64 string" `
+        -Category InvalidArgument -CategoryActivity "Verifying Thumbprint Format" -CategoryReason "Thumbprint is not 40 Char Base64 String" `
         -CategoryTargetName "$SHA1CertThumbprint" -CategoryTargetType "Base64String"
     exit 7
 }
@@ -173,7 +173,7 @@ if(!$PSBoundParameters.ContainsKey('SHA256CertThumbprint'))
 if ("$SHA256CertThumbprint" -notmatch "^[0-9A-Fa-f]{40}$")
 {
     Write-Error -Message "SHA256 Thumbprint Malformed" -RecommendedAction "Check the thumbprint and try again" -ErrorId "9" `
-        -Category InvalidArgument -CategoryActivity "Verifying Thumbprint Format" -CategoryReason "Thumbprint is not a 40 character Base64 string" `
+        -Category InvalidArgument -CategoryActivity "Verifying Thumbprint Format" -CategoryReason "Thumbprint is not 40 Char Base64 String" `
         -CategoryTargetName "$SHA256CertThumbprint" -CategoryTargetType "Base64String"
     exit 9
 }
@@ -194,7 +194,7 @@ if(!$PSBoundParameters.ContainsKey('TimeStampingServer'))
 if ("$TimeStampingServer" -notmatch "^http(s)?:\/\/[A-Za-z0-9-._~:/?#[\]@!$&'()*+,;=]+$")
 {
     Write-Error -Message "SHA256 Thumbprint Malformed" -RecommendedAction "Check the TimeStamp URL and try again" -ErrorId "11" `
-        -Category InvalidArgument -CategoryActivity "Verifying TimeStamping URL" -CategoryReason "TimeStamping URL is not a RFC Compliant URL" `
+        -Category InvalidArgument -CategoryActivity "Verifying TimeStamping URL" -CategoryReason "TimeStamping URL is not a valid URL" `
         -CategoryTargetName "$TimeStampingServer" -CategoryTargetType "URL"
     exit 11
 }
