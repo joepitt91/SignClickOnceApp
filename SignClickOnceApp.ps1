@@ -229,14 +229,3 @@ Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$PublishPath\$Pr
 # Readd .deply extensions
 Write-Verbose "Re-adding .deploy extensions"
 Get-ChildItem -Path "$TargetPath\*"  -Recurse | Where-Object {!$_.PSIsContainer -and $_.Name -notlike "*.manifest" -and $_.Name -notlike "*.application"} | Rename-Item -NewName {$_.Name + ".deploy"}
-
-###
-exit 99
-
-Invoke-Expression 'SignTool.exe sign /fd SHA256 /td SHA256 /tr http://time.certum.pl/ /sha1 5d81f6a4e1fb468a3b97aeb3601a467cdd5e3266 "$PublishDir\Setup.exe"'
-Invoke-Expression 'SignTool.exe sign /fd SHA256 /td SHA256 /tr http://time.certum.pl/ /sha1 5d81f6a4e1fb468a3b97aeb3601a467cdd5e3266 "$AppDataDir\$SolutionName.exe.deploy"'
-Get-ChildItem "$AppDataDir\*.deploy" -Recurse | Rename-Item -NewName { $_.Name -replace '\.deploy','' } 
-Start-Process "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\mage.exe" -ArgumentList "-update `"$AppDataDir\$SolutionName.exe.manifest`" -ch f3f33ccc36ffffe5baba632d76e73177206143eb -if `"Logo.ico`" -ti `"http://time.certum.pl/`"" -Wait -NoNewWindow
-Start-Process "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\mage.exe" -ArgumentList "-update `"$AppDataDir\$SolutionName.application`" -ch f3f33ccc36ffffe5baba632d76e73177206143eb -appManifest `"$AppDataDir\$SolutionName.exe.manifest`" -pub `"Joe Pitt`" -ti `"http://time.certum.pl/`"" -Wait -NoNewWindow
-Start-Process "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\mage.exe" -ArgumentList "-update `"$PublishDir\$SolutionName.application`" -ch f3f33ccc36ffffe5baba632d76e73177206143eb -appManifest `"$AppDataDir\$SolutionName.exe.manifest`" -pub `"Joe Pitt`" -ti `"http://time.certum.pl/`"" -Wait -NoNewWindow
-Get-ChildItem -Path "$AppDataDir\*"  -Recurse | Where-Object {!$_.PSIsContainer -and $_.Name -notlike "*.manifest" -and $_.Name -notlike "*.application"} | Rename-Item -NewName {$_.Name + ".deploy"}
