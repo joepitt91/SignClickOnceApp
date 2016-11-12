@@ -1,20 +1,18 @@
 ﻿<#
 .SYNOPSIS 
-    A PowerShell Script to correctly sign a ClickOnce Application.
+    A PowerShell Script to correctly sign a ClickOnce Application using a SHA256 Certificate.
 .DESCRIPTION 
     Microsoft ClickOnce Applications Signed with a SHA256 Certificate show as Unknown Publisher during installation, ClickOnce Applications signed with a SHA1 Certificate show an Unknown Publisher SmartScreen Warning once installed, this happens because:
-    1) The ClickOnce installer only supports SHA1 certificates (not SHA256), but,
-    2) Microsoft has depreciated SHA1 for Authenticode Signing.
+     1) The ClickOnce installer only supports SHA1 certificates (not SHA256) without a specific override when signing, but,
+     2) Microsoft has depreciated SHA1 for Authenticode Signing.
     
-    This script uses two code signing certificates (one SHA1 and one SHA256) to sign the various parts of the ClickOnce Application so that both the ClickOnce Installer and SmartScreen are happy.
+    This script signs the various parts of the ClickOnce Application so that both the ClickOnce Installer and SmartScreen are happy.
 .PARAMETER VSRoot
     The Visual Studio Projects folder, if not provided .\Documents\Visual Studio 2015\Projects will be assumed
 .PARAMETER SolutionName
     The Name of the Visual Studio Solution (Folder), if not provided the user is prompted.
 .PARAMETER ProjectName
     The Name of the Visual Studio Project (Folder), if not provided the user is prompted.
-.PARAMETER SHA1CertThumbprint
-    The Thumbprint of the SHA1 Code Signing Certificate, if not provided the user is prompted.
 .PARAMETER SHA256CertThumbprint
     The Thumbprint of the SHA256 Code Signing Certificate, if not provided the user is prompted.
 .PARAMETER TimeStampingServer
@@ -24,7 +22,7 @@
 .PARAMETER Verbose
     Writes verbose output.
 .EXAMPLE
-    SignClickOnceApp.ps1 -VSRoot "C:\Users\Username\Documents\Visual Studio 2015\Projects" -SolutionName "MySolution" -ProjectName "MyProject" -SHA1CertThumbprint "f3f33ccc36ffffe5baba632d76e73177206143eb" -SHA256CertThumbprint "5d81f6a4e1fb468a3b97aeb3601a467cdd5e3266" -TimeStampingServer "http://time.certum.pl/" -PublisherName "Awesome Software Inc."
+    SignClickOnceApp.ps1 -VSRoot "C:\Users\Username\Documents\Visual Studio 2015\Projects" -SolutionName "MySolution" -ProjectName "MyProject" -SHA256CertThumbprint "5d81f6a4e1fb468a3b97aeb3601a467cdd5e3266" -TimeStampingServer "http://time.certum.pl/" -PublisherName "Awesome Software Inc."
     Signs MyProject in MySolution which is in C:\Users\Username\Documents\Visual Studio 2015\Projects using the specified certificates, with a publisher of "Awesome Software Inc." and the Certum Timestamping Server.
 .NOTES 
     Author  : Joe Pitt
@@ -36,7 +34,6 @@ param (
     [string]$VSRoot, 
     [string]$SolutionName, 
     [string]$ProjectName, 
-    [string]$SHA1CertThumbprint, 
     [string]$SHA256CertThumbprint, 
     [string]$TimeStampingServer,
     [string]$PublisherName,
@@ -144,27 +141,6 @@ else
     exit 6
 }
 
-# SHA1 Certificate
-if(!$PSBoundParameters.ContainsKey('SHA1CertThumbprint'))
-{
-    $SHA1CertThumbprint = Read-Host "SHA1 Certificate Thumbprint"
-}
-if ("$SHA1CertThumbprint" -notmatch "^[0-9A-Fa-f]{40}$")
-{
-    Write-Error -Message "SHA1 Thumbprint Malformed" -RecommendedAction "Check the thumbprint and try again" -ErrorId "7" `
-        -Category InvalidArgument -CategoryActivity "Verifying Thumbprint Format" -CategoryReason "Thumbprint is not 40 Char Base64 String" `
-        -CategoryTargetName "$SHA1CertThumbprint" -CategoryTargetType "Base64String"
-    exit 7
-}
-$SHA1Found = Get-ChildItem -Path Cert:\CurrentUser\My | where {$_.Thumbprint -eq "$SHA1CertThumbprint"} | Measure-Object
-if ($SHA1Found.Count -eq 0)
-{
-    Write-Error -Message "SHA1 Certificate Not Found" -RecommendedAction "Check the thumbprint and try again" -ErrorId "8" `
-        -Category ObjectNotFound -CategoryActivity "Searching for certificate" -CategoryReason "Certificate with Thumbprint not found" `
-        -CategoryTargetName "$SHA1CertThumbprint" -CategoryTargetType "Base64String"
-    exit 8
-}
-
 # SHA256 Certificate
 if(!$PSBoundParameters.ContainsKey('SHA256CertThumbprint'))
 {
@@ -200,7 +176,6 @@ if ("$TimeStampingServer" -notmatch "^http(s)?:\/\/[A-Za-z0-9-._~:/?#[\]@!$&'()*
 }
 
 # Publisher Name
-# Project Path
 if(!$PSBoundParameters.ContainsKey('PublisherName'))
 {
     $PublisherName = Read-Host "Publisher Name"
@@ -216,15 +191,13 @@ Start-Process "$PSScriptRoot\signtool.exe" -ArgumentList "sign /fd SHA256 /td SH
 Write-Verbose "Removing .deploy extensions"
 Get-ChildItem "$TargetPath\*.deploy" -Recurse | Rename-Item -NewName { $_.Name -replace '\.deploy','' } 
 
-# Sign Manifest with SHA256 Cert
+# Sign Manifests with SHA256 Cert
 Write-Verbose "Signing '$TargetPath\$ProjectName.exe.manifest' (SHA256)"
-Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$ProjectName.exe.manifest`" -ch $SHA256CertThumbprint -if `"Logo.ico`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
-
-# Sign ClickOnces with SHA1 Cert
-Write-Verbose "Signing '$TargetPath\$ProjectName.application' (SHA1)"
-Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$ProjectName.application`"  -ch $SHA1CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"$PublisherName`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
-Write-Verbose "Signing '$PublishPath\$ProjectName.application' (SHA1)"
-Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$PublishPath\$ProjectName.application`" -ch $SHA1CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"$PublisherName`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
+Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$ProjectName.exe.manifest`" -Algorithm sha256RSA -ch $SHA256CertThumbprint -if `"Logo.ico`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
+Write-Verbose "Signing '$TargetPath\$ProjectName.application' (SHA256)"
+Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$TargetPath\$ProjectName.application`" -Algorithm sha256RSA -ch $SHA256CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"$PublisherName`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
+Write-Verbose "Signing '$PublishPath\$ProjectName.application' (SHA256)"
+Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$PublishPath\$ProjectName.application`" -Algorithm sha256RSA -ch $SHA256CertThumbprint -appManifest `"$TargetPath\$ProjectName.exe.manifest`" -pub `"$PublisherName`" -ti `"$TimeStampingServer`"" -Wait -NoNewWindow
 
 # Readd .deply extensions
 Write-Verbose "Re-adding .deploy extensions"
