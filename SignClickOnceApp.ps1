@@ -128,10 +128,11 @@ else
 }
 
 # Target Path
-$TargetPath = Convert-Path "$AppFilesPath\${ProjectName}_*"
-if ($($TargetPath.Length) -ne 0)
+$TargetPaths = Get-ChildItem -Path $AppFilesPath -Filter "${ProjectName}_*" -Directory | Sort-Object -Descending 
+if ($TargetPaths.Count -gt 0)
 {
-    Write-Verbose "Using $TargetPath for Target Path"
+    $TargetPath = $TargetPaths[0].FullName
+    Write-Verbose "Using '$TargetPath' for Target Path"
 }
 else
 {
