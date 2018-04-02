@@ -10,10 +10,10 @@ This script signs the various parts of the ClickOnce Application so that both th
 
 ## Links
 * [Project Page](https://www.joepitt.co.uk/Project/SignClickOnceApp/)
-* **BugTrac** (Coming Soon...)
+* [Issues](https://github.com/joepitt91/SignClickOnceApp/issues)
 
 ## Usage
-Extract the ZIP archive and open PowerShell, type C:\Path\to\\SignClickOnceApp.ps1, plus any of the options below.
+Extract the ZIP archive and open PowerShell, run  .\SignClickOnceApp.ps1, with the options below.
 
 ### Options
 * **-VSRoot** The Visual Studio Projects folder, if not provided *.\Documents\Visual Studio 2015\Projects* will be assumed
