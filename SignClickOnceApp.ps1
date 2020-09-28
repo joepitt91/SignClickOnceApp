@@ -26,6 +26,7 @@
     Signs MyProject in MySolution which is in C:\Users\Username\Documents\Visual Studio 2015\Projects using the specified certificates, with a publisher of "Awesome Software Inc." and the Certum Timestamping Server.
 .NOTES 
     Author  : Joe Pitt
+    Version : v2.2.0 (2020-09-28)
     License : This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or(at your option) any later version.
 .LINK 
     https://www.joepitt.co.uk/Project/SignClickOnceApp/
