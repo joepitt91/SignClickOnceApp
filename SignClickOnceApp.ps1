@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS 
     A PowerShell Script to correctly sign a ClickOnce Application using a SHA256 Certificate.
 .DESCRIPTION 
@@ -41,22 +41,18 @@ param (
 )
 
 $oldverbose = $VerbosePreference
-if($Verbose) 
-{
-	$VerbosePreference = "continue" 
+if ($Verbose) {
+    $VerbosePreference = "continue" 
 }
 
 # Visual Studio Root Path
-if(!$PSBoundParameters.ContainsKey('VSRoot'))
-{
+if (!$PSBoundParameters.ContainsKey('VSRoot')) {
     $VSRoot = '.\Documents\Visual Studio 2015\Projects\'
 }
-if (Test-Path "$VSRoot")
-{
+if (Test-Path "$VSRoot") {
     Write-Verbose "Using '$VSRoot' for Visual Studio Root"
 }
-else
-{
+else {
     Write-Error -Message "VSRoot does not exist." -RecommendedAction "Check path and try again" -ErrorId "1" `
         -Category ObjectNotFound -CategoryActivity "Testing VSRoot Path" -CategoryReason "The VSRoot path was not found" `
         -CategoryTargetName "$VSRoot" -CategoryTargetType "Directory"
@@ -64,17 +60,14 @@ else
 }
 
 # Solution Path
-if(!$PSBoundParameters.ContainsKey('SolutionName'))
-{
+if (!$PSBoundParameters.ContainsKey('SolutionName')) {
     $SolutionName = Read-Host "Solution Name"
 }
-if (Test-Path "$VSRoot\$SolutionName")
-{
+if (Test-Path "$VSRoot\$SolutionName") {
     Write-Verbose "Using '$VSRoot\$SolutionName' for Solution Path"
     $SolutionPath = "$VSRoot\$SolutionName"
 }
-else
-{
+else {
     Write-Error -Message "Solution does not exist." -RecommendedAction "Check Solution Name and try again" -ErrorId "2" `
         -Category ObjectNotFound -CategoryActivity "Testing Solution Path" -CategoryReason "The Solution path was not found" `
         -CategoryTargetName "$VSRoot\$SolutionName" -CategoryTargetType "Directory"
@@ -82,17 +75,14 @@ else
 }
 
 # Project Path
-if(!$PSBoundParameters.ContainsKey('ProjectName'))
-{
+if (!$PSBoundParameters.ContainsKey('ProjectName')) {
     $ProjectName = Read-Host "Project Name"
 }
-if (Test-Path "$SolutionPath\$ProjectName")
-{
+if (Test-Path "$SolutionPath\$ProjectName") {
     Write-Verbose "Using '$SolutionPath\$ProjectName' for Project Path"
     $ProjectPath = "$SolutionPath\$ProjectName"
 }
-else
-{
+else {
     Write-Error -Message "Project does not exist." -RecommendedAction "Check Project Name and try again" -ErrorId "3" `
         -Category ObjectNotFound -CategoryActivity "Testing Project Path" -CategoryReason "The Project path was not found" `
         -CategoryTargetName "$SolutionPath\$ProjectName" -CategoryTargetType "Directory"
@@ -100,13 +90,11 @@ else
 }
 
 # Publish Path
-if (Test-Path "$ProjectPath\publish")
-{
+if (Test-Path "$ProjectPath\publish") {
     Write-Verbose "Using '$ProjectPath\publish' for Publish Path"
     $PublishPath = "$ProjectPath\publish"
 }
-else
-{
+else {
     Write-Error -Message "Publish path does not exist." -RecommendedAction "Check Project has been published to \publish and try again" -ErrorId "4" `
         -Category ObjectNotFound -CategoryActivity "Testing Publish Path" -CategoryReason "The publish path was not found" `
         -CategoryTargetName "$ProjectPath\publish" -CategoryTargetType "Directory"
@@ -114,13 +102,11 @@ else
 }
 
 # Application Files Path
-if (Test-Path "$PublishPath\Application Files")
-{
+if (Test-Path "$PublishPath\Application Files") {
     Write-Verbose "Using '$PublishPath\Application Files' for Application Files Path"
     $AppFilesPath = "$PublishPath\Application Files"
 }
-else
-{
+else {
     Write-Error -Message "Application Files path does not exist." -RecommendedAction "Check Project has been published to \publish and try again" -ErrorId "5" `
         -Category ObjectNotFound -CategoryActivity "Testing Application Files Path" -CategoryReason "The Application Files path was not found" `
         -CategoryTargetName "$PublishPath\Application Files" -CategoryTargetType "Directory"
@@ -129,13 +115,11 @@ else
 
 # Target Path
 $TargetPaths = Get-ChildItem -Path $AppFilesPath -Filter "${ProjectName}_*" -Directory | Sort-Object -Descending 
-if ($TargetPaths.Count -gt 0)
-{
+if ($TargetPaths.Count -gt 0) {
     $TargetPath = $TargetPaths[0].FullName
     Write-Verbose "Using '$TargetPath' for Target Path"
 }
-else
-{
+else {
     Write-Error -Message "No versions." -RecommendedAction "Check Project has been published to \publish and try again" -ErrorId "6" `
         -Category ObjectNotFound -CategoryActivity "Searching for published version path" -CategoryReason "Application has not been published yet" `
         -CategoryTargetName "$AppFilesPath\${ProjectName}_*" -CategoryTargetType "Directory"
@@ -143,20 +127,17 @@ else
 }
 
 # SHA256 Certificate
-if(!$PSBoundParameters.ContainsKey('SHA256CertThumbprint'))
-{
+if (!$PSBoundParameters.ContainsKey('SHA256CertThumbprint')) {
     $SHA256CertThumbprint = Read-Host "SHA256 Certificate Thumbprint"
 }
-if ("$SHA256CertThumbprint" -notmatch "^[0-9A-Fa-f]{40}$")
-{
+if ("$SHA256CertThumbprint" -notmatch "^[0-9A-Fa-f]{40}$") {
     Write-Error -Message "SHA256 Thumbprint Malformed" -RecommendedAction "Check the thumbprint and try again" -ErrorId "9" `
         -Category InvalidArgument -CategoryActivity "Verifying Thumbprint Format" -CategoryReason "Thumbprint is not 40 Char Base64 String" `
         -CategoryTargetName "$SHA256CertThumbprint" -CategoryTargetType "Base64String"
     exit 9
 }
-$SHA256Found = Get-ChildItem -Path Cert:\CurrentUser\My | where {$_.Thumbprint -eq "$SHA256CertThumbprint"} | Measure-Object
-if ($SHA256Found.Count -eq 0)
-{
+$SHA256Found = Get-ChildItem -Path Cert:\CurrentUser\My | Where-Object { $_.Thumbprint -eq "$SHA256CertThumbprint" } | Measure-Object
+if ($SHA256Found.Count -eq 0) {
     Write-Error -Message "SHA256 Certificate Not Found" -RecommendedAction "Check the thumbprint and try again" -ErrorId "10" `
         -Category ObjectNotFound -CategoryActivity "Searching for certificate" -CategoryReason "Certificate with Thumbprint not found" `
         -CategoryTargetName "$SHA256CertThumbprint" -CategoryTargetType "Base64String"
@@ -164,12 +145,10 @@ if ($SHA256Found.Count -eq 0)
 }
 
 # TimeStamping Server
-if(!$PSBoundParameters.ContainsKey('TimeStampingServer'))
-{
+if (!$PSBoundParameters.ContainsKey('TimeStampingServer')) {
     $TimeStampingServer = Read-Host "TimeStamping Server URL"
 }
-if ("$TimeStampingServer" -notmatch "^http(s)?:\/\/[A-Za-z0-9-._~:/?#[\]@!$&'()*+,;=]+$")
-{
+if ("$TimeStampingServer" -notmatch "^http(s)?:\/\/[A-Za-z0-9-._~:/?#[\]@!$&'()*+,;=]+$") {
     Write-Error -Message "SHA256 Thumbprint Malformed" -RecommendedAction "Check the TimeStamp URL and try again" -ErrorId "11" `
         -Category InvalidArgument -CategoryActivity "Verifying TimeStamping URL" -CategoryReason "TimeStamping URL is not a valid URL" `
         -CategoryTargetName "$TimeStampingServer" -CategoryTargetType "URL"
@@ -177,8 +156,7 @@ if ("$TimeStampingServer" -notmatch "^http(s)?:\/\/[A-Za-z0-9-._~:/?#[\]@!$&'()*
 }
 
 # Publisher Name
-if(!$PSBoundParameters.ContainsKey('PublisherName'))
-{
+if (!$PSBoundParameters.ContainsKey('PublisherName')) {
     $PublisherName = Read-Host "Publisher Name"
 }
 
@@ -190,7 +168,7 @@ Start-Process "$PSScriptRoot\signtool.exe" -ArgumentList "sign /fd SHA256 /td SH
 
 # Remove .deploy extensions
 Write-Verbose "Removing .deploy extensions"
-Get-ChildItem "$TargetPath\*.deploy" -Recurse | Rename-Item -NewName { $_.Name -replace '\.deploy','' } 
+Get-ChildItem "$TargetPath\*.deploy" -Recurse | Rename-Item -NewName { $_.Name -replace '\.deploy', '' } 
 
 # Sign Manifests with SHA256 Cert
 Write-Verbose "Signing '$TargetPath\$ProjectName.exe.manifest' (SHA256)"
@@ -202,4 +180,5 @@ Start-Process "$PSScriptRoot\mage.exe" -ArgumentList "-update `"$PublishPath\$Pr
 
 # Readd .deply extensions
 Write-Verbose "Re-adding .deploy extensions"
-Get-ChildItem -Path "$TargetPath\*"  -Recurse | Where-Object {!$_.PSIsContainer -and $_.Name -notlike "*.manifest" -and $_.Name -notlike "*.application"} | Rename-Item -NewName {$_.Name + ".deploy"}
+Get-ChildItem -Path "$TargetPath\*"  -Recurse | Where-Object { !$_.PSIsContainer -and $_.Name -notlike "*.manifest" -and $_.Name -notlike "*.application" } | Rename-Item -NewName { $_.Name + ".deploy" }
+$VerbosePreference = $oldverbose
