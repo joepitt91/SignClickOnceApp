@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS 
     A PowerShell Script to correctly sign a ClickOnce Application using a SHA256 Certificate.
 .DESCRIPTION 
@@ -26,7 +26,7 @@
     Signs MyProject in MySolution which is in C:\Users\Username\Documents\Visual Studio 2015\Projects using the specified certificates, with a publisher of "Awesome Software Inc." and the Certum Timestamping Server.
 .NOTES 
     Author  : Joe Pitt
-    License : SignClickOnceApp by Joe Pitt is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.
+    License : This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or(at your option) any later version.
 .LINK 
     https://www.joepitt.co.uk/Project/SignClickOnceApp/
 #>
