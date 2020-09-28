@@ -6,7 +6,7 @@
      1) The ClickOnce installer only supports SHA1 certificates (not SHA256) without a specific override when signing, but,
      2) Microsoft has depreciated SHA1 for Authenticode Signing.
     
-    This script signs the various parts of the ClickOnce Application so that both the ClickOnce Installer and SmartScreen are happy.
+    This script signs the various parts of the ClickOnce Application so that both the ClickOnce Installer and SmartScreen do not alert for this reason. SmartScreen may still show Unknown Publisher based on unknown conditions it uses to determine trustworthiness.
 .PARAMETER VSRoot
     The Visual Studio Projects folder, if not provided .\Documents\Visual Studio 2015\Projects will be assumed
 .PARAMETER SolutionName
